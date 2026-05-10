@@ -1,0 +1,61 @@
+# ============================================
+# CORE LANGCHAIN
+# ============================================
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+
+# ============================================
+# LLM PROVIDERS
+# ============================================
+langchain-google-genai
+langchain-groq
+langchain-mistralai
+
+# ============================================
+# FASTAPI & SERVER
+# ============================================
+fastapi
+uvicorn[standard]
+python-multipart
+httpx
+
+# ============================================
+# VECTOR STORE
+# ============================================
+faiss-cpu
+
+# ============================================
+# TOKENIZATION & EMBEDDINGS
+# ============================================
+tiktoken
+sentence-transformers
+
+# ============================================
+# DOCUMENT LOADERS
+# ============================================
+pypdf
+docx2txt
+unstructured
+beautifulsoup4
+requests
+
+# ============================================
+# ENVIRONMENT & CONFIG
+# ============================================
+python-dotenv
+pydantic
+pydantic-settings
+
+# ============================================
+# DATA PROCESSING
+# ============================================
+numpy
+pandas
+
+# ============================================
+# UTILITIES
+# ============================================
+tqdm
+tenacity
