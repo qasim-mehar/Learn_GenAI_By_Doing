@@ -1,0 +1,27 @@
+# Requirements for LangChain + Mistral chat
+# Core libraries
+langchain
+transformers
+torch
+accelerate
+huggingface-hub
+sentence-transformers
+python-dotenv
+requests
+
+# Tokenizers / optional helpers
+tiktoken
+
+# Optional for memory / vector search
+faiss-cpu
+
+# Optional performance / quantization (may be platform-specific)
+bitsandbytes  # optional: 8-bit optimizations (Linux/WSL/compatible GPUs)
+
+# Optional API clients
+# If using Mistral's hosted API or official client, add their client package if available, e.g.:
+# mistral-client
+# If routing through OpenAI-compatible endpoints, include:
+# openai
+
+# Pin versions if you need reproducible installs, e.g. langchain==0.0.x
