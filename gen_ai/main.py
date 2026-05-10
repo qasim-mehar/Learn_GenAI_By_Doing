@@ -19,3 +19,12 @@ responses = model.batch(
 )
 for response in responses:
     show(response.content)
+
+
+model = init_chat_model(
+    "claude-sonnet-4-6",
+    temperature=0.7,  # 0 = focused, 1 = creative
+    max_tokens=1000,  # cap your output length
+    timeout=30,  # don't hang forever
+    max_retries=6,  # auto-retry on rate limits & timeouts
+)
