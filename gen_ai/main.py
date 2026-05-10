@@ -10,7 +10,7 @@ def show(text):
 
 
 model = init_chat_model(model="mistral-medium-3-5", max_tokens=1000)
-"""responses = model.batch(
+responses = model.batch(
     [
         "Why do parrots have colorful feathers?",
         "How do airplanes fly?",
@@ -18,9 +18,4 @@ model = init_chat_model(model="mistral-medium-3-5", max_tokens=1000)
     ]
 )
 for response in responses:
-    show(response.content)"""
-
-res = model.invoke(
-    "I'm Learning gen ai now write a really brief and saturated description for my github repo 'Learn_GenAI_By_Doing' tell them what i have learn throuout gen ai journey in >350 chars "
-)
-show(res.content)
+    show(response.content)
