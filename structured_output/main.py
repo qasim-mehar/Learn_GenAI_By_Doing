@@ -31,3 +31,8 @@ Extraction:
 """
     ]
 )
+movie_paragraph = input("Enter movie info: ")
+final_prompt = prompt_template.invoke({"text": movie_paragraph})
+res = model.invoke(final_prompt)
+
+print(res.content)
