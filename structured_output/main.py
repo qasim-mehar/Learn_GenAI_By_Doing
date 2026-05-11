@@ -16,7 +16,7 @@ class movieSummarySchema(BaseModel):
     cast: List[str]
     premise: str
     IMDb_rating: float
-    music_composer: str
+    music_composer: Optional[str]
 
 
 parse = PydanticOutputParser(pydantic_object=movieSummarySchema)
@@ -26,30 +26,20 @@ model = ChatMistralAI(
 )
 prompt_template = ChatPromptTemplate.from_messages(
     [
-        """
-You are an expert data extractor. Please extract the following details from the movie description provided below.
-
-Format your output as a plain text list with the field name followed by its value. If a specific piece of information is not explicitly mentioned in the text, you must return the word "null" for that field. Do not use JSON formatting.
-
-Required Fields:
-- Title:
-- Release Year:
-- Director:
-- Cast:
-- Premise:
-- Box Office:
-- IMDb Rating:
-- Music Composer:
-
-Movie Description:
-{text}
-
-Extraction:
-"""
+        (
+            "system"
+            """
+      You are an expert data extractor. Please extract the following details from the movie description provided below.
+      output should be in {outputSchema}
+      """
+        ),
+        ("human", "{text}"),
     ]
 )
 movie_paragraph = input("Enter movie info: ")
-final_prompt = prompt_template.invoke({"text": movie_paragraph})
+final_prompt = prompt_template.invoke(
+    {"outputSchema": parse.get_format_instructions(), "text": movie_paragraph}
+)
 res = model.invoke(final_prompt)
 
 print(res.content)
