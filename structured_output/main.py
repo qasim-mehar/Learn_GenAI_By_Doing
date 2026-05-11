@@ -2,6 +2,7 @@ from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel
 from typing import List, Optional
+from langchain_core.output_parsers import PydanticOutputParser
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,9 +15,11 @@ class movieSummarySchema(BaseModel):
     genre: List[str]
     cast: List[str]
     premise: str
-    IMDb_rating: int
+    IMDb_rating: float
     music_composer: str
 
+
+parse = PydanticOutputParser(pydantic_object=movieSummarySchema)
 
 model = ChatMistralAI(
     model="mistral-medium-3-5",
