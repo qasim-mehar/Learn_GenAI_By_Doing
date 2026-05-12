@@ -1,0 +1,52 @@
+Most devs just call an LLM with default settings and wonder why outputs are garbage.
+
+Here's every parameter that actually matters when configuring a chat model.
+
+model
+The specific model you're calling. You can bundle provider + model in one argument.
+"openai:o1" instead of configuring them separately. Clean.
+
+temperature
+Controls creativity vs precision.
+High = creative, unpredictable
+Low = focused, deterministic
+Building a legal doc parser? Keep it low. Creative writing? Crank it up.
+
+max_tokens
+Caps your response length. Controls cost too.
+Don't sleep on this one in production.
+
+timeout
+Seconds before the request just dies.
+Set this or one slow response will hang your entire app.
+
+max_retries
+Default is 6. Uses exponential backoff with jitter automatically.
+Rate limits (429) and server errors (5xx) are retried.
+401 and 404 are NOT retried. Ever.
+Running long agent tasks on flaky networks? Push this to 10-15.
+
+api_key
+Pull it from env variables. Never hardcode it. Ever.
+
+Using init_chat_model this becomes one clean block:
+
+Python
+
+model = init_chat_model(
+    "claude-sonnet-4-6",
+    temperature=0.7,
+    timeout=30,
+    max_tokens=1000,
+    max_retries=6,
+)
+
+One place. All your config. No scattered settings across files.
+
+Most people configure none of this and then blame the model.
+
+The model isn't the problem.
+
+#AI #LLMs #Python #LangChain #BuildingInPublic
+
+w
