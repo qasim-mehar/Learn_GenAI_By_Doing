@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 from langchain_mistralai import ChatMistralAI
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 load_dotenv()
 
@@ -9,10 +10,17 @@ model = ChatMistralAI(
     model="mistral-medium-3-5",
 )
 
-data = TextLoader("temp.txt")
+data = PyPDFLoader("doc_loader/lec 1.pdf")
 docs = data.load()
 
-# print(docs.page_content)
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=50,
+)
+chunks = splitter.create_documents(docs)
+
+
 prompt_template = ChatPromptTemplate.from_messages(
     [
         (
@@ -23,7 +31,7 @@ prompt_template = ChatPromptTemplate.from_messages(
     ]
 )
 
-final_prompt = prompt_template.format_messages(data=docs[0].page_content)
+final_prompt = prompt_template.format_messages(data=docs)
 
 res = model.invoke(final_prompt)
 
