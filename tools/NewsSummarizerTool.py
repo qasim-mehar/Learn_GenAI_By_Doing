@@ -16,3 +16,12 @@ prompt = ChatPromptTemplate.from_template(
   You are expert news summarizer with over 15 years of experince, now summarize these news in bulletpoints /n {news}
   """
 )
+
+search_agent = TavilySearch()
+news_result = search_agent.invoke({"query": "Google I/O 2026"})
+
+chain = prompt | llm | parser
+
+summary = chain.invoke({"news": news_result})
+
+print(summary)
