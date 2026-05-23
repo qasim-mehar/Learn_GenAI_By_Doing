@@ -19,12 +19,12 @@ def get_weather(city: str) -> str:
     if not api_key:
         return "Error: OPENWEATHER_API_KEY not found in environment variables."
 
-    # We use units=metric to get Celsius. Change to units=imperial for Fahrenheit.
+    # use units=metric to get Celsius. Change to units=imperial for F.
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
 
     try:
         response = requests.get(url)
-        response.raise_for_status()  # This will throw an error if the city isn't found
+        response.raise_for_status()  #  throw an error if the city isn't found
         data = response.json()
 
         temp = data["main"]["temp"]
@@ -36,3 +36,89 @@ def get_weather(city: str) -> str:
         return f"Could not find weather for '{city}'. Please check if the city name is correct."
     except Exception as e:
         return f"An error occurred while fetching the weather: {str(e)}"
+
+
+@tool
+def get_news(city: str) -> str:
+    """Return the current top 3 top news of a city"""
+    api_key = os.getenv("TAVILY_API_KEY")
+
+    if not api_key:
+        return "Error: TAVILY_API_KEY not found in environment variables."
+
+    client = TavilyClient(api_key=api_key)
+
+    try:
+        response = client.search(
+            query=f"latest news in {city}", topic="news", max_results=3
+        )
+
+        results = response.get("results", [])
+
+        if not results:
+            return f"No recent news found for {city}."
+
+        # Format the top 3 results into a clean, readable string for the LLM
+        news_items = []
+        for i, item in enumerate(results, start=1):
+            title = item.get("title", "No Title")
+            content = item.get("content", "No summary available.")
+            news_items.append(f"{i}. {title}\nSummary: {content}")
+
+        return "\n\n".join(news_items)
+
+    except Exception as e:
+        return f"An error occurred while fetching the news: {str(e)}"
+
+
+llm = ChatMistralAI(model="mistral-medium-3-5")
+
+llm_with_tools = llm.bind_tools([get_weather, get_news])
+tools = {"get_weather": get_weather, "get_news": get_news}
+
+messages = []
+print("WELCOME TO CITY INTEL SYSTEM")
+print()
+print("Press 0 to exit!")
+
+while True:
+    prompt = input("You: ")
+    if prompt == "0":
+        break
+
+    messages.append(HumanMessage(content=prompt))
+
+    while True:
+        llm_response = llm_with_tools.invoke(messages)
+
+        messages.append(llm_response)
+
+        if llm_response.tool_calls:
+            for tool_call in llm_response.tool_calls:
+                tool_name = tool_call["name"]
+
+                confirm = input(f"Agent wants to use {tool_name}, approve? (yes/no): ")
+
+                if confirm.lower() == "no":
+                    print("Access denied!")
+
+                    messages.append(
+                        ToolMessage(
+                            content="User denied access to this tool.",
+                            tool_call_id=tool_call["id"],
+                        )
+                    )
+                    continue
+
+                tool_result = tools[tool_name].invoke(tool_call)
+
+                messages.append(
+                    ToolMessage(content=tool_result, tool_call_id=tool_call["id"])
+                )
+
+            continue
+
+        else:
+            print(f"\nAI: {llm_response.content}\n")
+            print(messages)
+            break
