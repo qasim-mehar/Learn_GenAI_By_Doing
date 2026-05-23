@@ -38,3 +38,16 @@ messages.append(query)
 
 llm_result = llm_with_tool.invoke(messages)
 messages.append(llm_result)
+
+
+if llm_result.tool_calls:
+    for tool_call in llm_result.tool_calls:
+        tool_name = tool_call["name"]
+        tool_result = tools_dict[tool_name].invoke(tool_call)
+        messages.append(tool_result)
+
+    final_result = llm.invoke(messages)
+    print(f"\nAI: {final_result.content}")
+
+else:
+    print(f"\nAI: {llm_result.content}")
