@@ -13,12 +13,16 @@ parser = StrOutputParser()
 
 prompt = ChatPromptTemplate.from_template(
     """
-  You are expert news summarizer with over 15 years of experince, now summarize these news in bulletpoints /n {news}
+  You are expert text summarizer with over 15 years of experince, now summarize these news in bulletpoints /n {news}
   """
 )
 
 search_agent = TavilySearch()
-news_result = search_agent.invoke({"query": "Google I/O 2026"})
+news_result = search_agent.invoke(
+    {
+        "query": "GTop 5 best of the best modern Gen AI projects i should make to stant out in 2026"
+    }
+)
 
 chain = prompt | llm | parser
 
