@@ -137,3 +137,64 @@ Sometimes, basic similarity search isn't enough. Here is how you take your RAG s
 *   **Multi-Query Retrieval:** Users often ask terrible, poorly-worded questions. This strategy uses an LLM to secretly rewrite the user's question into 4 or 5 different variations, searches the database for *all* of them, and combines the results. This guarantees you don't miss data just because the user used a weird synonym!
 
 ---
+---
+
+## 9. LCEL (LangChain Expression Language) & Runnables
+
+> **The Teacher's Analogy:** Imagine you are building a water pipeline. In the old days of LangChain, you bought pre-welded pipes ("Legacy Chains")—they worked, but if you wanted to change a valve, it was a nightmare. **LCEL** is like standardizing every piece of plumbing to use the exact same thread. Now, you can screw any pipe, valve, or filter together perfectly.
+
+### 9.1 The "Runnable" Interface
+A "Runnable" is simply LangChain's standardized wrapper. In LCEL, *everything* is a Runnable: your Prompt is a Runnable, your LLM is a Runnable, and your Output Parser is a Runnable. Because they all share the exact same DNA, they all use the exact same commands:
+* `.invoke()`: Pass a single input through the pipeline.
+* `.batch()`: Pass a list of inputs simultaneously.
+* `.stream()`: Stream the output back chunk-by-chunk (crucial for real-time typing UI).
+
+### 9.2 The Pipe Operator (`|`)
+This is the magic of LCEL. It allows you to chain Runnables together like Lego blocks.
+* *Code Example:* `chain = prompt_template | chat_model | output_parser`
+
+### 9.3 Types of Runnables
+To build advanced pipelines, you need different types of joints to connect your logic:
+* **RunnableSequence:** A linear pipeline (A → B → C).
+* **RunnableParallel:** Runs multiple operations at the exact same time.
+    * *Co-related Topic:* This drastically reduces API wait times. If you need a summary *and* a translation, do them in parallel!
+* **RunnableLambda:** The ultimate escape hatch. If you need to run standard Python code (like formatting a date or printing a console log) in the middle of your AI chain, you wrap your custom Python function in a Lambda.
+* **RunnablePassthrough:** Passes the original data down the chain without touching it.
+    * *Example: Code Assistant.* You want the LLM to write Python code, but you *also* want an explanation. You use Passthrough to hand the original generated code directly to the final output so it isn't lost during the explanation step.
+
+---
+
+## 10. Tools: Giving the Brain "Hands"
+
+> **The Teacher's Analogy:** An LLM on its own is a super-genius brain trapped in a glass jar. It can think beautifully, but it can't check the weather, read today's news, or use a calculator. **Tools** are the robotic hands we attach to the jar.
+
+### 10.1 How Tools Work (The Co-related Topic: Function Calling)
+Under the hood, tools rely on a feature called **Function Calling**. When you bind a tool to an LLM, you are essentially passing the LLM a JSON schema detailing what the tool does. The LLM doesn't *execute* the code; instead, it outputs a highly specific JSON response saying, *"Hey, human! Please run the 'Weather_Tool' with the argument 'Delhi'."*
+
+### 10.2 Built-in vs. Custom Tools
+* **Built-in Tools:** LangChain has an ecosystem of plug-and-play tools.
+    * *Tavily:* An AI-optimized search engine that returns clean, readable text instead of cluttered HTML.
+    * *OpenWeather:* Fetches live weather data.
+* **Custom Tools (`@tool`):** You can turn *any* Python function into an AI tool by adding the `@tool` decorator above it.
+    * **CRITICAL Pro-Tip:** The **docstring** (the text description inside your Python function) is the most important part! The LLM reads this docstring to decide *when* and *how* to use the tool. If your docstring is bad, the AI will use the tool incorrectly.
+
+---
+
+## 11. AI Agents: The Autonomous Orchestrators
+
+> **The Teacher's Analogy:** A "Chain" (LCEL) is like a factory worker on an assembly line—it executes step 1, step 2, and step 3 blindly. An **Agent** is a Project Manager. You give it a final goal, and the Agent decides which tools to use, in what order, and loops continuously until the job is done.
+
+### 11.1 The ReAct Framework (Co-related Topic)
+How does an Agent actually "think"? Most agents use a prompting framework called **ReAct** (Reasoning + Acting).
+1.  **Thought:** The AI thinks: *"I need to find the weather in Bhopal, but first I need to know Bhopal's coordinates."*
+2.  **Action:** Calls a Location Tool.
+3.  **Observation:** Receives the coordinates.
+4.  **Thought:** *"Now I have coordinates, I will use the Weather Tool."*
+*(This loop repeats until the final answer is ready).*
+
+### 11.2 Agent Implementation Methods
+* **Manual Loop:** Hard-coding a Python `while` loop that checks if the LLM wants to use a tool, runs the tool, appends the result to message history, and asks the LLM again. (Great for learning the mechanics).
+* **Autonomous (`create_agent`):** LangChain's built-in function that manages the loop, state, and tool execution internally. It makes your code incredibly clean.
+* **Human-in-the-Loop (HITL) / Middleware:** Agents can be dangerous if left unchecked (e.g., an agent with access to a "Delete Database" tool). You can wrap tool executions in middleware that pauses the code and asks for a human `Y/N` input in the terminal before proceeding.
+
+---
